@@ -31,28 +31,18 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
-      - name: Auto-Fix Android V1 Embedding
-        run: flutter create --org com.myvpn --project-name checker --platforms android .
-
-      - name: Fix Gradle Errors (Packaging & Shrink)
+      - name: Reset Android Folder (Fix all Gradle errors)
         run: |
+          rm -rf android
+          flutter create --org com.myvpn --project-name checker --platforms android .
           sed -i 's/packaging {/packagingOptions {/g' android/app/build.gradle
-          python3 -c "
-          import re
-          file_path = 'android/app/build.gradle'
-          with open(file_path, 'r') as f:
-              content = f.read()
-          content = re.sub(r'shrinkResources\s+true', 'shrinkResources false', content)
-          content = re.sub(r'shrinkResources\s*=\s*true', 'shrinkResources false', content)
-          with open(file_path, 'w') as f:
-              f.write(content)
-          "
+          sed -i 's/shrinkResources true/shrinkResources false/g' android/app/build.gradle
 
       - name: Get dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --split-per-abi --no-shrink
+        run: flutter build apk --release --split-per-abi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
