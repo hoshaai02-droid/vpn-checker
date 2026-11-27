@@ -37,13 +37,22 @@ jobs:
       - name: Fix Gradle Errors (Packaging & Shrink)
         run: |
           sed -i 's/packaging {/packagingOptions {/g' android/app/build.gradle
-          sed -i 's/shrinkResources true/shrinkResources false/g' android/app/build.gradle
+          python3 -c "
+          import re
+          file_path = 'android/app/build.gradle'
+          with open(file_path, 'r') as f:
+              content = f.read()
+          content = re.sub(r'shrinkResources\s+true', 'shrinkResources false', content)
+          content = re.sub(r'shrinkResources\s*=\s*true', 'shrinkResources false', content)
+          with open(file_path, 'w') as f:
+              f.write(content)
+          "
 
       - name: Get dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --no-shrink
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
