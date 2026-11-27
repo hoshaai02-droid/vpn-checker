@@ -34,6 +34,10 @@ jobs:
       - name: Auto-Fix Android V1 Embedding
         run: flutter create --org com.myvpn --project-name checker --platforms android .
 
+      - name: Fix Gradle Packaging Error
+        run: |
+          sed -i 's/packaging {/packagingOptions {/g' android/app/build.gradle
+
       - name: Get dependencies
         run: flutter pub get
 
